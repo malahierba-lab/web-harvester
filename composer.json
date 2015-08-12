@@ -1,0 +1,30 @@
+{
+    "name": "malahierba-lab/web-harvester",
+    "description": "Laravel HTTP Client with Javascript capabilites",
+    "keywords": [
+        "http",
+        "javascript",
+        "phantomjs",
+        "scraping",
+        "curl",
+        "harvesting",
+        "laravel"
+    ],
+    "license" : "MIT",
+    "authors": [
+        {
+            "name": "malahierba team",
+            "email": "lab@malahierba.cl",
+            "homepage": "http://malahierba.cl"
+        }
+    ],
+    "require": {
+        "php": ">=5.5.18",
+        "laravel/framework": "5.1.*"
+    },
+    "autoload": {
+        "psr-4": {
+            "Malahierba\\WebHarvester\\": "src/"
+        }
+    }
+}
