@@ -369,29 +369,30 @@ class WebHarvester {
             //Opengraph Test
             if ($meta->getAttribute('property') == 'og:title') {
 
-                $title =  trim($meta->getAttribute('content'));
+                $title_candidate =  trim($meta->getAttribute('content'));
 
-                if (! empty($title))
-                    break;
+                if (strlen($title_candidate) > strlen($title))
+                    $title = $title_candidate;
             }
 
             //Twitter Tags Test
             if ($meta->getAttribute('name') == 'twitter:title') {
 
-                $title =  trim($meta->getAttribute('content'));
+                $title_candidate =  trim($meta->getAttribute('content'));
 
-                if (! empty($title))
-                    break;
+                if (strlen($title_candidate) > strlen($title))
+                    $title = $title_candidate;
             }
         }
 
-        if (empty($title)) {
+        //Title tag test
+        $title_tag = $this->domdocument->getElementsByTagName('title');
 
-            //Title tag test
-            $title_tag = $this->domdocument->getElementsByTagName('title');
+        if ($title_tag->length > 0) {
+            $title_candidate = trim($title_tag->item(0)->nodeValue);
 
-            if ($title_tag->length > 0)
-                $title = trim($title_tag->item(0)->nodeValue);
+            if (strlen($title_candidate) > strlen($title))
+                $title = $title_candidate;
         }
 
        return empty($title) ? false : $title;
@@ -417,28 +418,28 @@ class WebHarvester {
             //Opengraph Test
             if ($meta->getAttribute('property') == 'og:description') {
 
-                $description =  trim($meta->getAttribute('content'));
+                $description_candidate =  trim($meta->getAttribute('content'));
 
-                if (! empty($description))
-                    break;
+                if (strlen($description_candidate) > strlen($description))
+                    $description = $description_candidate;
             }
 
             //Twitter Tags Test
             if ($meta->getAttribute('name') == 'twitter:description') {
 
-                $description =  trim($meta->getAttribute('content'));
+                $description_candidate =  trim($meta->getAttribute('content'));
 
-                if (! empty($description))
-                    break;
+                if (strlen($description_candidate) > strlen($description))
+                    $description = $description_candidate;
             }
 
             //Description Meta Test
             if ($meta->getAttribute('name') == 'description') {
 
-                $description =  trim($meta->getAttribute('content'));
+                $description_candidate =  trim($meta->getAttribute('content'));
 
-                if (! empty($description))
-                    break;
+                if (strlen($description_candidate) > strlen($description))
+                    $description = $description_candidate;
             }
         }
 
