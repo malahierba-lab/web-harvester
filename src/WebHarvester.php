@@ -28,6 +28,8 @@ class WebHarvester {
 
     protected $content;
 
+    protected $domdocument = false;
+
     /**
      * Load an URL and put the content and info at instance vars
      *
@@ -38,7 +40,13 @@ class WebHarvester {
     public function load($url, $options = array())
     {
         $default_options = [
+            'max_execution_time'    => 120,
         ];
+
+        $options = array_merge($default_options, $options);
+
+        if ($options['max_execution_time'])
+            set_time_limit($options['max_execution_time']);
 
         $this->reset();
 
@@ -46,7 +54,6 @@ class WebHarvester {
             return false;
 
         $command = $this->getLoadCommand($url);
-
         exec($command, $output, $status);
 
         if ($status !== 0)
@@ -55,6 +62,15 @@ class WebHarvester {
         $this->extractData($output);
         
         $this->content = $this->stringToUTF8($this->content);
+
+        //try to load content as domdocument
+        $domdocument = new \DomDocument;
+
+        libxml_use_internal_errors(TRUE);
+        if ($domdocument->loadHTML($this->content())) {
+            $this->domdocument = $domdocument;
+        }
+        libxml_use_internal_errors(FALSE);
 
         return true;
     }
@@ -187,6 +203,7 @@ class WebHarvester {
         }
 
         $this->content          = null;
+        $this->domdocument      = false;
     }
 
     /**
@@ -202,7 +219,7 @@ class WebHarvester {
             if ($key == 0) {
                 $this->requested_url = $this->getInfoFromURL($line);
             } elseif ($key == 1) {
-                $this->effective_url = $this->getInfoFromURL($line);
+                $this->real_url = $this->getInfoFromURL($line);
             } else {
                 $this->content .= $line;
             }
@@ -275,5 +292,215 @@ class WebHarvester {
         $string = mb_convert_encoding($string, 'UTF-8', 'HTML-ENTITIES');
 
         return $string;
+    }
+
+    /**
+     * Get the URL for Featured Image
+     *
+     * @param   void
+     * @return  string|false
+     */
+    public function getFeaturedImage()
+    {
+        if (! $this->domdocument)
+            return false;
+
+        $metas      = $this->domdocument->getElementsByTagName('meta');
+
+        $image_url  = '';
+            
+        foreach($metas as $meta) {
+        
+            //Opengraph Test
+            if ($meta->getAttribute('property') == 'og:image') {
+
+                $image_url =  trim($meta->getAttribute('content'));
+
+                if (! empty($image_url))
+                    break;
+            }
+
+            //Twitter Tags Test
+            if ($meta->getAttribute('name') == 'twitter:image') {
+                $image_url =  trim($meta->getAttribute('content'));
+
+                if (! empty($image_url))
+                    break;
+            }
+        }
+
+        if (empty($image_url))
+            return false;
+
+        //Test for full or relative URL
+        $test_url = parse_url($image_url);
+
+        if (! $test_url)
+            return false;
+
+        if (! isset($test_url['host'])) {
+
+            if ($image_url[0] == '/')
+                $image_url = substr($image_url, 1);
+
+            $image_url = $this->getBasePath() . $image_url;
+        }
+
+        return $image_url;
+    }
+
+    /**
+     * Get the Title
+     *
+     * @param   void
+     * @return  string|false
+     */
+    public function getTitle()
+    {
+        if (! $this->domdocument)
+            return false;
+
+        $metas      = $this->domdocument->getElementsByTagName('meta');
+
+        $title  = '';
+            
+        foreach($metas as $meta) {
+        
+            //Opengraph Test
+            if ($meta->getAttribute('property') == 'og:title') {
+
+                $title =  trim($meta->getAttribute('content'));
+
+                if (! empty($title))
+                    break;
+            }
+
+            //Twitter Tags Test
+            if ($meta->getAttribute('name') == 'twitter:title') {
+
+                $title =  trim($meta->getAttribute('content'));
+
+                if (! empty($title))
+                    break;
+            }
+        }
+
+        if (empty($title)) {
+
+            //Title tag test
+            $title_tag = $page->getElementsByTagName('title');
+
+            if ($title->length > 0)
+                $title = trim($title->item(0)->nodeValue);
+        }
+
+       return empty($title) ? false : $title;
+    }
+
+    /**
+     * Get the Description
+     *
+     * @param   void
+     * @return  string|false
+     */
+    public function getDescription()
+    {
+        if (! $this->domdocument)
+            return false;
+
+        $metas      = $this->domdocument->getElementsByTagName('meta');
+
+        $description  = '';
+            
+        foreach($metas as $meta) {
+        
+            //Opengraph Test
+            if ($meta->getAttribute('property') == 'og:description') {
+
+                $description =  trim($meta->getAttribute('content'));
+
+                if (! empty($description))
+                    break;
+            }
+
+            //Twitter Tags Test
+            if ($meta->getAttribute('name') == 'twitter:description') {
+
+                $description =  trim($meta->getAttribute('content'));
+
+                if (! empty($description))
+                    break;
+            }
+
+            //Description Meta Test
+            if ($meta->getAttribute('name') == 'description') {
+
+                $description =  trim($meta->getAttribute('content'));
+
+                if (! empty($description))
+                    break;
+            }
+        }
+
+       return empty($description) ? false : $description;
+    }
+
+    /**
+     * Get the Base Path for current document. Work only if current document is a HTML document.
+     *
+     * @param   void
+     * @return  string|false
+     */
+    public function getBasePath()
+    {
+        if (! $this->domdocument)
+            return false;
+
+        $base_tag       = $this->domdocument->getElementsByTagName('base');
+
+        if ($base_tag->length == 0)
+            return $this->realURL()->scheme . $this->realURL()->host;
+
+        $base_path      = $base_tag->item(0)->getAttribute('href');
+
+        if (! (empty($base_path))) {
+
+            $base_parse = parse_url($base_path);
+
+            //URL Builder
+            if ($base_parse) {
+
+                //Scheme
+                if (isset($base_parse['scheme'])) {
+                    $base_path_temp = $base_parse['scheme'] . '://';
+                } elseif (! empty($this->realURL()->scheme)) {
+                    $base_path_temp = $this->realURL()->scheme . '://';
+                } else {
+                    $base_path_temp = 'http://';
+                }
+
+                //Host
+                if (isset($base_parse['host'])) {
+                    $base_path_temp .= $base_parse['host'];
+                } elseif (! empty($this->realURL()->host)) {
+                    $base_path_temp .= $this->realURL()->host;
+                } else {
+                    return false; // --> without a host we can't continue
+                }
+
+                //Path
+                if (isset($base_parse['path'])) {
+                    $base_path_temp .= $base_parse['path'];
+                } elseif (! empty($this->realURL()->path)) {
+                    $base_path_temp .= $this->realURL()->path;
+                } else {
+                    $base_path_temp .= '/';
+                }
+
+                $base_path = $base_path_temp;
+            }
+        }
+
+        return ! empty($base_path) ? $base_path : $this->realURL()->scheme . $this->realURL()->host . '/';
     }
 }
