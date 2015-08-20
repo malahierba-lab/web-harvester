@@ -54,20 +54,19 @@ class WebHarvester {
             return false;
 
         $command = $this->getLoadCommand($url);
+
         exec($command, $output, $status);
 
         if ($status !== 0)
             return false;
     
         $this->extractData($output);
-        
-        $this->content = $this->stringToUTF8($this->content);
 
         //try to load content as domdocument
         $domdocument = new \DomDocument;
 
         libxml_use_internal_errors(TRUE);
-        if ($domdocument->loadHTML($this->content())) {
+        if ($domdocument->loadHTML('<?xml encoding="utf-8" ?>' . $this->content())) {
             $this->domdocument = $domdocument;
         }
         libxml_use_internal_errors(FALSE);
@@ -221,7 +220,7 @@ class WebHarvester {
             } elseif ($key == 1) {
                 $this->real_url = $this->getInfoFromURL($line);
             } else {
-                $this->content .= $line;
+                $this->content .= $this->stringToUTF8($line);
             }
         }
     }
@@ -259,7 +258,6 @@ class WebHarvester {
     {
         $codifications =    array(
                                 'ASCII',
-                                'UTF-8',
                                 'ISO-8859-1',
                                 'UTF-16',
                                 'UTF-16BE',
@@ -279,17 +277,19 @@ class WebHarvester {
                                 'ISO-8859-13',
                                 'ISO-8859-14',
                                 'ISO-8859-15',
+                                'UTF-8',
                             );
         
-        $original_charset = mb_detect_encoding($string, $codifications, true);
+        $original_charset = mb_detect_encoding($string, mb_detect_order(), true);
 
         if (! $original_charset)
             return false;
 
-        if ($original_charset != 'UTF-8')
+        if ($original_charset != 'UTF-8') {
             $string = mb_convert_encoding($string, 'UTF-8', $original_charset);
+        }
         
-        $string = mb_convert_encoding($string, 'UTF-8', 'HTML-ENTITIES');
+        //$string = mb_convert_encoding($string, 'UTF-8', 'HTML-ENTITIES');
 
         return $string;
     }
