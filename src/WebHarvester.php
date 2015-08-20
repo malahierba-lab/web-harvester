@@ -460,7 +460,7 @@ class WebHarvester {
         $base_tag       = $this->domdocument->getElementsByTagName('base');
 
         if ($base_tag->length == 0)
-            return $this->realURL()->scheme . $this->realURL()->host;
+            return $this->realURL()->scheme . '://' . $this->realURL()->host . '/';
 
         $base_path      = $base_tag->item(0)->getAttribute('href');
 
@@ -502,6 +502,6 @@ class WebHarvester {
             }
         }
 
-        return ! empty($base_path) ? $base_path : $this->realURL()->scheme . $this->realURL()->host . '/';
+        return ! empty($base_path) ? $base_path : $this->realURL()->scheme . '://' . $this->realURL()->host . '/';
     }
 }
