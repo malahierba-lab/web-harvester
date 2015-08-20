@@ -390,8 +390,8 @@ class WebHarvester {
             //Title tag test
             $title_tag = $this->domdocument->getElementsByTagName('title');
 
-            if ($title->length > 0)
-                $title = trim($title->item(0)->nodeValue);
+            if ($title_tag->length > 0)
+                $title = trim($title_tag->item(0)->nodeValue);
         }
 
        return empty($title) ? false : $title;
