@@ -1,6 +1,8 @@
-var system = require('system');
+var arguments   = require('./arguments.js');
 
-url     = system.args[1];
+var options     = arguments.getArgs();
+
+url             = options.url;
 
 content         = null;
 requested_url   = url;
@@ -9,10 +11,11 @@ effective_url   = url;
 var page        = require('webpage').create();
 
 page.settings = {
-    javascriptEnabled   : true,
-    loadImages          : true,
-    userAgent           : 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.9; rv:32.0) Gecko/20100101 Firefox/32.0',
-    resourceTimeout     : 10500,
+    javascriptEnabled   : options.exec_javascript,
+    loadImages          : options.load_images,
+    userAgent           : options.user_agent,
+    resourceTimeout     : options.resource_timeout,
+    webSecurityEnabled  : options.web_security,
 }
 
 page.viewportSize = {
@@ -55,7 +58,7 @@ page.onLoadFinished = function (status)
         console.log(content);
 
         phantom.exit();
-    }, 2500);
+    }, options.wait_after_load);
 }
 
 page.open(url, function (status)

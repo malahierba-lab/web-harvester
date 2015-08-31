@@ -167,7 +167,14 @@ class WebHarvester {
         $httpclient_path    = $this->getHttpClientPath();
         $script_path        = __DIR__ . '/scripts/load.js';
 
-        $command = $httpclient_path . ' --ssl-protocol=any --ignore-ssl-errors=true ' . $script_path . ' ' . $url;
+        $command     = $httpclient_path;
+        $command    .= ' --ssl-protocol=any --ignore-ssl-errors=true';
+        $command    .= ' ' . $script_path;
+        $command    .= ' url=' . $url;
+        $command    .= ' wait-after-load=5000';
+        $command    .= ' resource-timeout=3000';
+        $command    .= ' web-security=false';
+        $command    .= ' user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:39.0) Gecko/20100101 Firefox/39.0"';
 
         return $command;
     }
@@ -183,7 +190,15 @@ class WebHarvester {
         $httpclient_path    = $this->getHttpClientPath();
         $script_path        = __DIR__ . '/scripts/screenshot.js';
 
-        $command = $httpclient_path . ' --ssl-protocol=any --ignore-ssl-errors=true --web-security=false ' . $script_path . ' ' . $url;
+        $command     = $httpclient_path;
+        $command    .= ' --ssl-protocol=any --ignore-ssl-errors=true';
+        $command    .= ' ' . $script_path;
+        $command    .= ' url=' . $url;
+        $command    .= ' wait-after-load=5000';
+        $command    .= ' resource-timeout=3000';
+        $command    .= ' web-security=false';
+        $command    .= ' load-images=true';
+        $command    .= ' user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:39.0) Gecko/20100101 Firefox/39.0"';
 
         return $command;
     }
@@ -385,14 +400,18 @@ class WebHarvester {
             }
         }
 
-        //Title tag test
-        $title_tag = $this->domdocument->getElementsByTagName('title');
+        if (empty($title)) {
 
-        if ($title_tag->length > 0) {
-            $title_candidate = trim($title_tag->item(0)->nodeValue);
+            //Title tag test
+            $title_tag = $this->domdocument->getElementsByTagName('title');
 
-            if (strlen($title_candidate) > strlen($title))
-                $title = $title_candidate;
+            if ($title_tag->length > 0) {
+                $title_candidate = trim($title_tag->item(0)->nodeValue);
+
+                if (strlen($title_candidate) > strlen($title))
+                    $title = $title_candidate;
+            }
+
         }
 
        return empty($title) ? false : $title;
