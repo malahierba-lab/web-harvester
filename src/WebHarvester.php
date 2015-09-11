@@ -359,6 +359,21 @@ class WebHarvester {
                 $image_url = substr($image_url, 1);
 
             $image_url = $this->getBasePath() . $image_url;
+
+        } else {
+
+            $temp_image_url = $image_url;
+
+            $image_url = empty($test_url['scheme']) ? 'http' : $test_url['scheme'] ;
+            $image_url .= '://';
+            $image_url .= $test_url['host'];
+
+            if (! empty($test_url['path']))
+                $image_url .= $test_url['path'];
+
+            if (! empty($test_url['query']))
+                $image_url .= $test_url['query'];
+
         }
 
         return $image_url;
