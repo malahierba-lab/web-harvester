@@ -171,8 +171,8 @@ class WebHarvester {
         $command    .= ' --ssl-protocol=any --ignore-ssl-errors=true';
         $command    .= ' ' . $script_path;
         $command    .= ' url=' . $url;
-        $command    .= ' wait-after-load=5000';
-        $command    .= ' resource-timeout=3000';
+        $command    .= ' wait-after-load=7000';
+        $command    .= ' resource-timeout=7000';
         $command    .= ' web-security=false';
         $command    .= ' user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:39.0) Gecko/20100101 Firefox/39.0"';
 
