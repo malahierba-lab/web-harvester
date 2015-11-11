@@ -14,7 +14,11 @@ Add in your composer.json:
 
 Then you need run the `composer update` command.
 
-After installation you need publish the config file. Simply execute `php artisan vendor:publish`
+After install you must to configure Service Provider. Simply add the service provider in the `config/app.php` providers section:
+
+    Malahierba\WebHarvester\WebHarvesterServiceProvider::class
+
+Now you need publish the config file. Simply execute `php artisan vendor:publish`
 
 ## Configuration
 
@@ -43,6 +47,16 @@ example: `'environment' => 'macosx'`
         $title              = $webharvester->getTitle();
         $description        = $webharvester->getDescription();
         $featured_image_url = $webharvester->getFeaturedImage();
+    }
+
+### Get the Links presents in WebPage (useful for web crawlers, spyders, etc.)
+
+    $url = 'http://someurl';
+    $webharvester = new WebHarvester;
+    
+    //Check if we can process the URL and Load it
+    if ($webharvester->load($url)) {
+        $links = $webharvester->getLinks();  //retrieve an array with found links
     }
 
 ### Get the WebPage Raw Content
