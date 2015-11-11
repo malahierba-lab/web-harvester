@@ -1,6 +1,6 @@
 # Laravel Web Harvester
 
-A tool for get information from external websites. Powered by PhantomJS project (and malahierba dev team)
+A tool for get information from external websites. Powered by PhantomJS and malahierba.cl dev team
 
 ## Installation
 
