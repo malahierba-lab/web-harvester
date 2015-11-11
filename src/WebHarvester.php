@@ -30,6 +30,14 @@ class WebHarvester {
 
     protected $domdocument = false;
 
+    protected $links  = array();
+
+    // Default options
+    protected $user_agent               = 'Malahierba WebHarvester';
+    protected $resource_timeout         = 3000;
+    protected $wait_after_load          = 7000;
+    protected $ignore_ssl_errors        = true;
+
     /**
      * Load an URL and put the content and info at instance vars
      *
@@ -68,6 +76,16 @@ class WebHarvester {
         libxml_use_internal_errors(TRUE);
         if ($domdocument->loadHTML('<?xml encoding="utf-8" ?>' . $this->content())) {
             $this->domdocument = $domdocument;
+
+            //get the links from document
+            $link_candidates = $domdocument->getElementsByTagName('a');
+
+            foreach ($link_candidates as $link) {
+                $url = $this->getAbsoluteUrl($link->getAttribute('href'));
+
+                if ($url && (! in_array($url, $this->links)))
+                    $this->links[] = $url;
+            }
         }
         libxml_use_internal_errors(FALSE);
 
@@ -172,9 +190,9 @@ class WebHarvester {
         $command    .= ' ' . $script_path;
         $command    .= ' url=' . $url;
         $command    .= ' wait-after-load=7000';
-        $command    .= ' resource-timeout=7000';
+        $command    .= ' resource-timeout=' . $this->resource_timeout;
         $command    .= ' web-security=false';
-        $command    .= ' user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:39.0) Gecko/20100101 Firefox/39.0"';
+        $command    .= ' user-agent="' . $this->user_agent . '"';
 
         return $command;
     }
@@ -195,10 +213,10 @@ class WebHarvester {
         $command    .= ' ' . $script_path;
         $command    .= ' url=' . $url;
         $command    .= ' wait-after-load=5000';
-        $command    .= ' resource-timeout=3000';
+        $command    .= ' resource-timeout=3000' . $this->resource_timeout;
         $command    .= ' web-security=false';
         $command    .= ' load-images=true';
-        $command    .= ' user-agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:39.0) Gecko/20100101 Firefox/39.0"';
+        $command    .= ' user-agent="' . $this->user_agent . '"';
 
         return $command;
     }
@@ -218,6 +236,7 @@ class WebHarvester {
 
         $this->content          = null;
         $this->domdocument      = false;
+        $this->links            = array();
     }
 
     /**
@@ -347,36 +366,7 @@ class WebHarvester {
         if (empty($image_url))
             return false;
 
-        //Test for full or relative URL
-        $test_url = parse_url($image_url);
-
-        if (! $test_url)
-            return false;
-
-        if (! isset($test_url['host'])) {
-
-            if ($image_url[0] == '/')
-                $image_url = substr($image_url, 1);
-
-            $image_url = $this->getBasePath() . $image_url;
-
-        } else {
-
-            $temp_image_url = $image_url;
-
-            $image_url = empty($test_url['scheme']) ? 'http' : $test_url['scheme'] ;
-            $image_url .= '://';
-            $image_url .= $test_url['host'];
-
-            if (! empty($test_url['path']))
-                $image_url .= $test_url['path'];
-
-            if (! empty($test_url['query']))
-                $image_url .= $test_url['query'];
-
-        }
-
-        return $image_url;
+        return $this->getAbsoluteUrl($image_url);
     }
 
     /**
@@ -537,5 +527,59 @@ class WebHarvester {
         }
 
         return ! empty($base_path) ? $base_path : $this->realURL()->scheme . '://' . $this->realURL()->host . '/';
+    }
+
+    /**
+     * Try to get the absolute url for given url. If fail return false.
+     *
+     * @param   string      url (absolute or relative)
+     * @return  string|false
+     */
+    protected function getAbsoluteUrl($url)
+    {
+        if (empty($url))
+            return false;
+
+        //Test for full or relative URL
+        $test_url = parse_url($url);
+
+        if (! $test_url)
+            return false;
+
+        if (! isset($test_url['host'])) {
+
+            if ($url[0] == '/')
+                $url = substr($url, 1);
+
+            $url = $this->getBasePath() . $url;
+
+        } else {
+
+            $temp_url = $url;
+
+            $url = empty($test_url['scheme']) ? 'http' : $test_url['scheme'] ;
+            $url .= '://';
+            $url .= $test_url['host'];
+
+            if (! empty($test_url['path']))
+                $url .= $test_url['path'];
+
+            if (! empty($test_url['query']))
+                $url .= $test_url['query'];
+
+        }
+
+        return $url;
+    }
+
+    /**
+     * Return the links presents in document (only work after load method)
+     *
+     * @param   void
+     * @return  array
+     */
+    public function getLinks()
+    {
+        return $this->links;
     }
 }
