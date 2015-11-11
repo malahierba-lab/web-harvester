@@ -49,7 +49,7 @@ example: `'environment' => 'macosx'`
         $featured_image_url = $webharvester->getFeaturedImage();
     }
 
-### Get the Links presents in WebPage (useful for web crawlers, web spiders, etc.)
+### Get the found links in WebPage (useful for web crawlers, web spiders, etc.)
 
     $url = 'http://someurl';
     $webharvester = new WebHarvester;
