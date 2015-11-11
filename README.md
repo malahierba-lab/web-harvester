@@ -14,7 +14,7 @@ Add in your composer.json:
 
 Then you need run the `composer update` command.
 
-After install you must to configure Service Provider. Simply add the service provider in the `config/app.php` providers section:
+After install you must configure Service Provider. Simply add the service provider in the `config/app.php` providers section:
 
     Malahierba\WebHarvester\WebHarvesterServiceProvider::class
 
