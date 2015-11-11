@@ -37,7 +37,7 @@ example: `'environment' => 'macosx'`
 
 **Important**: For documentation purposes, in the examples below, always we assume than you import the library into your namespace using `use Malahierba\WebHarvester;`
 
-### Get the WebPage Components
+### Get WebPage Components
 
     $url = 'http://someurl';
     $webharvester = new WebHarvester;
@@ -49,7 +49,7 @@ example: `'environment' => 'macosx'`
         $featured_image_url = $webharvester->getFeaturedImage();
     }
 
-### Get the found links in WebPage (useful for web crawlers, web spiders, etc.)
+### Get found links in WebPage (useful for web crawlers, web spiders, etc.)
 
     $url = 'http://someurl';
     $webharvester = new WebHarvester;
@@ -59,7 +59,7 @@ example: `'environment' => 'macosx'`
         $links = $webharvester->getLinks();  //retrieve an array with found links
     }
 
-### Get the WebPage Raw Content
+### Get WebPage Raw Content
 
     $url = 'http://someurl';
     $webharvester = new WebHarvester;
