@@ -8,7 +8,7 @@ Add in your composer.json:
 
     {
         "require": {
-            "malahierba-lab/web-harvester": "~1.0"
+            "malahierba-lab/web-harvester": "1.*"
         }
     }
 
