@@ -186,7 +186,8 @@ class WebHarvester {
         $script_path        = __DIR__ . '/scripts/load.js';
 
         $command     = $httpclient_path;
-        $command    .= ' --ssl-protocol=any --ignore-ssl-errors=true';
+        $command    .= ' --ssl-protocol=any';
+        $command    .= $this->ignore_ssl_errors ? ' --ignore-ssl-errors=true' : ' --ignore-ssl-errors=false';
         $command    .= ' ' . $script_path;
         $command    .= ' url=' . $url;
         $command    .= ' wait-after-load=7000';
@@ -209,7 +210,8 @@ class WebHarvester {
         $script_path        = __DIR__ . '/scripts/screenshot.js';
 
         $command     = $httpclient_path;
-        $command    .= ' --ssl-protocol=any --ignore-ssl-errors=true';
+        $command    .= ' --ssl-protocol=any';
+        $command    .= $this->ignore_ssl_errors ? ' --ignore-ssl-errors=true' : ' --ignore-ssl-errors=false';
         $command    .= ' ' . $script_path;
         $command    .= ' url=' . $url;
         $command    .= ' wait-after-load=5000';
@@ -581,5 +583,52 @@ class WebHarvester {
     public function getLinks()
     {
         return $this->links;
+    }
+
+    /**
+     * Configure a Custom User Agent
+     *
+     * @param   string
+     * @return  void
+     */
+    public function setUserAgent($user_agent)
+    {
+        $this->user_agent = $user_agent;
+    }
+
+    /**
+     * Configure the number of milliseconds to wait after load a web Page
+     *
+     * A Page with async content maybe empty when is loaded,
+     * this option allows you to wait for more content.
+     *
+     * @param   integer
+     * @return  void
+     */
+    public function setWaitAfterLoad($milliseconds)
+    {
+        $this->wait_after_load = $milliseconds;
+    }
+
+    /**
+     * Configure the number of milliseconds to wait a resource
+     *
+     * @param   integer
+     * @return  void
+     */
+    public function setResourceTimeout($milliseconds)
+    {
+        $this->resource_timeout = $milliseconds;
+    }
+
+    /**
+     * Configure whether the process should ignore ssl errors
+     *
+     * @param   bool
+     * @return  void
+     */
+    public function setIgnoreSSLErrors($bool)
+    {
+        $this->ignore_ssl_errors = $bool;
     }
 }

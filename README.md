@@ -78,6 +78,25 @@ example: `'environment' => 'macosx'`
     if ($webharvester->takeScreenshot($url)) {
         $image_base_64 = $webharvester->content();  //return a base64 string
     }
+
+### Setup Options
+
+You can customize the webharvester with some functions:
+
+    $url = 'http://someurl';
+    $webharvester = new WebHarvester;
+
+    //Custom User Agent
+    $webharvester->setUserAgent('your user agent');
+
+    //Ignore SSL Errors
+    $webharvester->setIgnoreSSLErrors(true);
+
+    //Resource Timeout (in milliseconds)
+    $webharvester->setResourceTimeout(3000);
+
+    //Wait after load (in milliseconds)
+    $webharvester->setWaitAfterLoad(3000);  // <- useful for get async content
     
 ## Licence
 
