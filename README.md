@@ -83,7 +83,6 @@ example: `'environment' => 'macosx'`
 
 You can customize the webharvester with some functions:
 
-    $url = 'http://someurl';
     $webharvester = new WebHarvester;
 
     //Custom User Agent
