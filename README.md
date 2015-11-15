@@ -57,8 +57,17 @@ example: `'environment' => 'macosx'`
     
     //Check if we can process the URL and Load it
     if ($webharvester->load($url)) {
+
+        //all full links
         $links = $webharvester->getLinks();  //retrieve an array with found links
+
+        //all links, but query component removed (from the character "?" onwards)
+        $links = $webharvester->getLinks([
+            'except' => ['query']
+        ]);
     }
+
+**Important**: For security reasons all links with embeded javascript are not included in output array
 
 ### Get WebPage Raw Content
 

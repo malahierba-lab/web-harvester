@@ -632,9 +632,37 @@ class WebHarvester {
      * @param   void
      * @return  array
      */
-    public function getLinks()
+    public function getLinks($options = [])
     {
-        return $this->links;
+        $links = $this->links;
+
+        foreach ($links as $key => $link) {
+
+            //remove link with javascript script for safe
+            if (strpos($link, 'javascript:')) {
+                unset($links[$key]);
+                continue;
+            }
+
+            //remove some component(s) from url based on option except
+            if (isset($options['except']) && is_array($options['except'])) {
+
+                //remove query component from links
+                if (in_array('query', $options['except'])) {
+
+                        $components = parse_url($link);
+                        $links[$key] = $components['scheme'] . '://' . $components['host'];
+
+                        if (isset($components['path']))
+                            $links[$key] .= $components['path'];
+
+                }
+
+            }
+
+        }
+
+        return array_values($links);
     }
 
     /**
