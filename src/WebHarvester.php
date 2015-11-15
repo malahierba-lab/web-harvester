@@ -136,7 +136,7 @@ class WebHarvester {
      *
      * @return  object
      */
-    public function requestedURL()
+    protected function requestedURL()
     {
         return (object) $this->requested_url;
     }
@@ -148,9 +148,29 @@ class WebHarvester {
      *
      * @return  object
      */
-    public function realURL()
+    protected function realURL()
     {
         return (object) $this->real_url;
+    }
+
+    /**
+     * Return the URL requested.
+     *
+     * @return string
+     */
+    public function getRequestedURL()
+    {
+        return $this->requestedURL()->full;
+    }
+
+    /**
+     * Return the real URL (last url in response)
+     *
+     * @return string
+     */
+    public function getRealURL()
+    {
+        return $this->realURL()->full;
     }
 
     /**
