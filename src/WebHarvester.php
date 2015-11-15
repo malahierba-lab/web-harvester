@@ -376,11 +376,11 @@ class WebHarvester {
         //Return Featured Image
         if ($return_as == 'url')
 
-            return $this->getAbsoluteUrl($image_url);
+            return $image_absolute_url;
 
         elseif ($return_as == 'base64')
 
-            return $this->getImageAsBase64($image_url);
+            return $this->getImageAsBase64($image_absolute_url);
 
         //If using invalid parameter $return_as
         throw new Exception("[WebHarvester] Error on getFeaturedImage: value '" . $return_as . "' not supported.", 1);
@@ -619,7 +619,7 @@ class WebHarvester {
                 $url .= $test_url['path'];
 
             if (! empty($test_url['query']))
-                $url .= $test_url['query'];
+                $url .= .'?' . $test_url['query'];
 
         }
 
