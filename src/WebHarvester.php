@@ -644,11 +644,11 @@ class WebHarvester {
                 continue;
             }
 
-            //remove some component(s) from url based on option except
-            if (isset($options['except']) && is_array($options['except'])) {
+            //remove some component(s) from url based on option 'remove'
+            if (isset($options['remove']) && is_array($options['remove'])) {
 
                 //remove query component from links
-                if (in_array('query', $options['except'])) {
+                if (in_array('query', $options['remove'])) {
 
                         $components = parse_url($link);
                         $links[$key] = $components['scheme'] . '://' . $components['host'];

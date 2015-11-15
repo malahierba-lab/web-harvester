@@ -63,7 +63,7 @@ example: `'environment' => 'macosx'`
 
         //all links, but query component removed (from the character "?" onwards)
         $links = $webharvester->getLinks([
-            'except' => ['query']
+            'remove' => ['query']
         ]);
     }
 
