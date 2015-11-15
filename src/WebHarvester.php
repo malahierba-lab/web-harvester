@@ -619,7 +619,7 @@ class WebHarvester {
                 $url .= $test_url['path'];
 
             if (! empty($test_url['query']))
-                $url .= .'?' . $test_url['query'];
+                $url .= '?' . $test_url['query'];
 
         }
 
