@@ -333,10 +333,10 @@ class WebHarvester {
     /**
      * Get the URL for Featured Image
      *
-     * @param   void
+     * @param   string          url (default) | base64
      * @return  string|false
      */
-    public function getFeaturedImage()
+    public function getFeaturedImage($return_as = 'url')
     {
         if (! $this->domdocument)
             return false;
@@ -368,7 +368,59 @@ class WebHarvester {
         if (empty($image_url))
             return false;
 
-        return $this->getAbsoluteUrl($image_url);
+        $image_absolute_url = $this->getAbsoluteUrl($image_url);
+
+        if (! $image_absolute_url)
+            return false;
+
+        //Return Featured Image
+        if ($return_as == 'url')
+
+            return $this->getAbsoluteUrl($image_url);
+
+        elseif ($return_as == 'base64')
+
+            return $this->getImageAsBase64($image_url);
+
+        //If using invalid parameter $return_as
+        throw new Exception("[WebHarvester] Error on getFeaturedImage: value '" . $return_as . "' not supported.", 1);
+    }
+
+    /**
+     * Get image and convert to base64
+     *
+     * @param   string
+     * @return  string|false
+     */
+    protected function getImageAsBase64($url)
+    {
+        // setup http client
+        $http_client = curl_init();
+        curl_setopt($http_client, CURLOPT_URL,              $url);
+        curl_setopt($http_client, CURLOPT_FOLLOWLOCATION,   false);
+        curl_setopt($http_client, CURLOPT_RETURNTRANSFER,   true);
+        curl_setopt($http_client, CURLOPT_CONNECTTIMEOUT,   $this->resource_timeout);
+        curl_setopt($http_client, CURLOPT_MAXREDIRS,        0);
+        curl_setopt($http_client, CURLOPT_TIMEOUT,          $this->resource_timeout);
+        curl_setopt($http_client, CURLOPT_USERAGENT,        $this->user_agent);
+
+        // try to get image
+        $response = curl_exec($http_client);
+
+        //check http code 200
+        if (curl_getinfo($http_client, CURLINFO_HTTP_CODE) != 200)
+            return false;
+
+        $mime = curl_getinfo($http_client, CURLINFO_CONTENT_TYPE);
+
+        //check if content is a supported image
+        if (! in_array($mime, [
+            'image/jpeg',
+            'image/png',
+        ]))
+            return false;
+
+        return 'data:' . $mime . ';base64,' . base64_encode($response);
     }
 
     /**

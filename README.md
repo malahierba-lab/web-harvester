@@ -44,9 +44,10 @@ example: `'environment' => 'macosx'`
     
     //Check if we can process the URL and Load it
     if ($webharvester->load($url)) {
-        $title              = $webharvester->getTitle();
-        $description        = $webharvester->getDescription();
-        $featured_image_url = $webharvester->getFeaturedImage();
+        $title                   = $webharvester->getTitle();
+        $description             = $webharvester->getDescription();
+        $featured_image_url      = $webharvester->getFeaturedImage();
+        $featured_image_base_64  = $webharvester->getFeaturedImage('base64');
     }
 
 ### Get found links in WebPage (useful for web crawlers, web spiders, etc.)
