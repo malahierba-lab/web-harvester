@@ -59,6 +59,9 @@ example: `'environment' => 'macosx'`
 
         //Page real URL (if the $url redirect to another, return the final)
         $real_url                = $webharvester->getRealURL();
+
+        //Site Name
+        $sitename                = $webharvester->getSiteName();
     }
 
 ### Get found links in WebPage (useful for web crawlers, web spiders, etc.)

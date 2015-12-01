@@ -456,44 +456,31 @@ class WebHarvester {
 
         $metas      = $this->domdocument->getElementsByTagName('meta');
 
-        $title  = '';
+        $title  = [];
             
         foreach($metas as $meta) {
         
             //Opengraph Test
-            if ($meta->getAttribute('property') == 'og:title') {
+            if ($meta->getAttribute('property') == 'og:title')
 
-                $title_candidate =  trim($meta->getAttribute('content'));
-
-                if (strlen($title_candidate) > strlen($title))
-                    $title = $title_candidate;
-            }
+                $title['opengraph']     = trim($meta->getAttribute('content'));
 
             //Twitter Tags Test
-            if ($meta->getAttribute('name') == 'twitter:title') {
+            elseif ($meta->getAttribute('name') == 'twitter:title')
 
-                $title_candidate =  trim($meta->getAttribute('content'));
-
-                if (strlen($title_candidate) > strlen($title))
-                    $title = $title_candidate;
-            }
+                $title['twittercard']   = trim($meta->getAttribute('content'));
         }
 
-        if (empty($title)) {
+        //Return Title
+        if (! empty($title['opengraph']))
+            return $title['opengraph'];
 
-            //Title tag test
-            $title_tag = $this->domdocument->getElementsByTagName('title');
+        if (! empty($title['twittercard']))
+            return $title['twittercard'];
 
-            if ($title_tag->length > 0) {
-                $title_candidate = trim($title_tag->item(0)->nodeValue);
+        $title_tag = trim($this->domdocument->getElementsByTagName('title'));
 
-                if (strlen($title_candidate) > strlen($title))
-                    $title = $title_candidate;
-            }
-
-        }
-
-       return empty($title) ? false : $title;
+        return empty($title_tag) ? false : $title_tag;
     }
 
     /**
@@ -509,39 +496,69 @@ class WebHarvester {
 
         $metas      = $this->domdocument->getElementsByTagName('meta');
 
-        $description  = '';
+        $description  = [];
             
         foreach($metas as $meta) {
         
             //Opengraph Test
-            if ($meta->getAttribute('property') == 'og:description') {
+            if ($meta->getAttribute('property') == 'og:description')
 
-                $description_candidate =  trim($meta->getAttribute('content'));
-
-                if (strlen($description_candidate) > strlen($description))
-                    $description = $description_candidate;
-            }
+                $description['opengraph']       = trim($meta->getAttribute('content'));
 
             //Twitter Tags Test
-            if ($meta->getAttribute('name') == 'twitter:description') {
+            elseif ($meta->getAttribute('name') == 'twitter:description')
 
-                $description_candidate =  trim($meta->getAttribute('content'));
-
-                if (strlen($description_candidate) > strlen($description))
-                    $description = $description_candidate;
-            }
+                $description['twittercard']     =  trim($meta->getAttribute('content'));
 
             //Description Meta Test
-            if ($meta->getAttribute('name') == 'description') {
+            elseif ($meta->getAttribute('name') == 'description')
 
-                $description_candidate =  trim($meta->getAttribute('content'));
-
-                if (strlen($description_candidate) > strlen($description))
-                    $description = $description_candidate;
-            }
+                $description['meta']            =  trim($meta->getAttribute('content'));
         }
 
-       return empty($description) ? false : $description;
+        //Return Description
+
+        if (! empty($description['opengraph']))
+            return $description['opengraph'];
+
+        if (! empty($description['twittercard']))
+            return $description['twittercard'];
+
+        if (! empty($description['meta']))
+            return $description['meta'];
+
+        return false;
+    }
+
+    /**
+     * Get the Site Name
+     *
+     * @param   void
+     * @return  string|false
+     */
+    public function getSiteName()
+    {
+        if (! $this->domdocument)
+            return false;
+
+        $metas      = $this->domdocument->getElementsByTagName('meta');
+
+        $sitename  = [];
+            
+        foreach($metas as $meta) {
+        
+            //Opengraph Test
+            if ($meta->getAttribute('property') == 'og:site_name')
+
+                $sitename['opengraph'] = trim($meta->getAttribute('content'));
+
+        }
+
+        //Return Site Name
+        if (! empty($sitename['opengraph']))
+            return $sitename['opengraph'];
+
+        return false;
     }
 
     /**
