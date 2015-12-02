@@ -74,7 +74,7 @@ class WebHarvester {
         $domdocument = new \DomDocument;
 
         libxml_use_internal_errors(TRUE);
-        if ($domdocument->loadHTML('<?xml encoding="utf-8" ?>' . $this->content())) {
+        if ($domdocument->loadHTML($this->content())) {
             $this->domdocument = $domdocument;
 
             //get the links from document
@@ -290,7 +290,7 @@ class WebHarvester {
             } elseif ($key == 1) {
                 $this->real_url = $this->getInfoFromURL($line);
             } else {
-                $this->content .= $this->stringToUTF8($line);
+                $this->content .= $this->stringToHTMLENTITIES($line);
             }
         }
     }
@@ -324,42 +324,29 @@ class WebHarvester {
      * @param   string  $string
      * @return  string
      */
-    protected function stringToUTF8($string)
-    {
-        $codifications =    array(
-                                'ASCII',
-                                'ISO-8859-1',
-                                'UTF-16',
-                                'UTF-16BE',
-                                'UTF-16LE',
-                                'CP1251',
-                                'CP1252',
-                                'BASE64',
-                                'ISO-8859-2',
-                                'ISO-8859-3',
-                                'ISO-8859-4',
-                                'ISO-8859-5',
-                                'ISO-8859-6',
-                                'ISO-8859-7',
-                                'ISO-8859-8',
-                                'ISO-8859-9',
-                                'ISO-8859-10',
-                                'ISO-8859-13',
-                                'ISO-8859-14',
-                                'ISO-8859-15',
-                                'UTF-8',
-                            );
+    protected function HtmlentitiesToUtf8($string)
+    {   
+        $string = html_entity_decode($string, ENT_COMPAT, 'UTF-8');
         
+        return $string ? $string : false ;
+    }
+
+    /**
+     * Convert a string into HTMLENTITIES
+     *
+     * @param   string  $string
+     * @return  string
+     */
+    protected function stringToHTMLENTITIES($string)
+    {   
         $original_charset = mb_detect_encoding($string, mb_detect_order(), true);
 
         if (! $original_charset)
             return false;
 
-        if ($original_charset != 'UTF-8') {
-            $string = mb_convert_encoding($string, 'UTF-8', $original_charset);
+        if ($original_charset != 'HTML-ENTITIES') {
+            $string = mb_convert_encoding($string, 'HTML-ENTITIES', $original_charset);
         }
-        
-        //$string = mb_convert_encoding($string, 'UTF-8', 'HTML-ENTITIES');
 
         return $string;
     }
@@ -465,6 +452,8 @@ class WebHarvester {
      */
     public function getTitle()
     {
+        $output = '';
+
         if (! $this->domdocument)
             return false;
 
@@ -487,19 +476,19 @@ class WebHarvester {
 
         //Return Title
         if (! empty($title['opengraph']))
-            return $title['opengraph'];
+            $output = $title['opengraph'];
 
-        if (! empty($title['twittercard']))
-            return $title['twittercard'];
+        elseif (! empty($title['twittercard']))
+            $output = $title['twittercard'];
 
-        $title_tag = $this->domdocument->getElementsByTagName('title');
+        else {
+            $title_tag = $this->domdocument->getElementsByTagName('title');
 
-        if ($title_tag->length < 1)
-            return false;
+            if ($title_tag->length > 0)
+                $output = $title_tag->item(0)->textContent;
+        }
 
-        $title = trim($title_tag->item(0)->textContent);
-
-        return empty($title) ? false : $title;
+        return empty($output) ? false : trim($this->HtmlentitiesToUtf8($output));
     }
 
     /**
@@ -510,6 +499,8 @@ class WebHarvester {
      */
     public function getDescription()
     {
+        $output = '';
+
         if (! $this->domdocument)
             return false;
 
@@ -538,15 +529,15 @@ class WebHarvester {
         //Return Description
 
         if (! empty($description['opengraph']))
-            return $description['opengraph'];
+            $output = $description['opengraph'];
 
-        if (! empty($description['twittercard']))
-            return $description['twittercard'];
+        elseif (! empty($description['twittercard']))
+            $output = $description['twittercard'];
 
-        if (! empty($description['meta']))
-            return $description['meta'];
+        elseif (! empty($description['meta']))
+            $output = $description['meta'];
 
-        return false;
+        return empty($output) ? false : trim($this->HtmlentitiesToUtf8($output));
     }
 
     /**
@@ -557,6 +548,8 @@ class WebHarvester {
      */
     public function getSiteName()
     {
+        $output = '';
+
         if (! $this->domdocument)
             return false;
 
@@ -575,9 +568,9 @@ class WebHarvester {
 
         //Return Site Name
         if (! empty($sitename['opengraph']))
-            return $sitename['opengraph'];
+            $output = $sitename['opengraph'];
 
-        return false;
+        return empty($output) ? false : trim($this->HtmlentitiesToUtf8($output));
     }
 
     /**

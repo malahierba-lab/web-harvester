@@ -16,6 +16,7 @@ page.settings = {
     userAgent           : options.user_agent,
     resourceTimeout     : options.resource_timeout,
     webSecurityEnabled  : options.web_security,
+    encoding            : "utf8",
 }
 
 page.onResourceError = function(resourceError)
