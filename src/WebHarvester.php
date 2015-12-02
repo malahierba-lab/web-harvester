@@ -492,9 +492,14 @@ class WebHarvester {
         if (! empty($title['twittercard']))
             return $title['twittercard'];
 
-        $title_tag = trim($this->domdocument->getElementsByTagName('title'));
+        $title_tag = $this->domdocument->getElementsByTagName('title');
 
-        return empty($title_tag) ? false : $title_tag;
+        if ($title_tag->length < 1)
+            return false;
+
+        $title = trim($title_tag->item(0)->textContent);
+
+        return empty($title) ? false : $title;
     }
 
     /**
