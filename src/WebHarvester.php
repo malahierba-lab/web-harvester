@@ -35,7 +35,7 @@ class WebHarvester {
     // Default options
     protected $user_agent               = 'Malahierba WebHarvester';
     protected $resource_timeout         = 3000;
-    protected $wait_after_load          = 7000;
+    protected $wait_after_load          = 3000;
     protected $ignore_ssl_errors        = true;
 
     /**
@@ -81,10 +81,23 @@ class WebHarvester {
             $link_candidates = $domdocument->getElementsByTagName('a');
 
             foreach ($link_candidates as $link) {
+
+                // get link url
                 $url = $this->getAbsoluteUrl($link->getAttribute('href'));
 
+                // to determine if has rel=nofollow
+                $rel = mb_strtolower(trim($link->getAttribute('href')));
+
+                if ((! empty($rel)) && (strpos($rel, 'nofollow') !== false))
+                    $follow = false;
+                else
+                    $follow = true;
+
                 if ($url && (! in_array($url, $this->links)))
-                    $this->links[] = $url;
+                    $this->links[]  = (object) [
+                                        'url'       => $url,
+                                        'follow'    => $follow,
+                                    ];
             }
         }
         libxml_use_internal_errors(FALSE);
@@ -210,9 +223,10 @@ class WebHarvester {
         $command    .= $this->ignore_ssl_errors ? ' --ignore-ssl-errors=true' : ' --ignore-ssl-errors=false';
         $command    .= ' ' . $script_path;
         $command    .= ' url=' . $url;
-        $command    .= ' wait-after-load=7000';
+        $command    .= ' wait-after-load=' . $this->wait_after_load;
         $command    .= ' resource-timeout=' . $this->resource_timeout;
         $command    .= ' web-security=false';
+        $command    .= ' load-images=false';
         $command    .= ' user-agent="' . $this->user_agent . '"';
 
         return $command;
@@ -234,8 +248,8 @@ class WebHarvester {
         $command    .= $this->ignore_ssl_errors ? ' --ignore-ssl-errors=true' : ' --ignore-ssl-errors=false';
         $command    .= ' ' . $script_path;
         $command    .= ' url=' . $url;
-        $command    .= ' wait-after-load=5000';
-        $command    .= ' resource-timeout=3000' . $this->resource_timeout;
+        $command    .= ' wait-after-load=' . $this->wait_after_load;
+        $command    .= ' resource-timeout=' . $this->resource_timeout;
         $command    .= ' web-security=false';
         $command    .= ' load-images=true';
         $command    .= ' user-agent="' . $this->user_agent . '"';
@@ -562,6 +576,66 @@ class WebHarvester {
     }
 
     /**
+     * Check meta tag robots to determine if page is indexable
+     *
+     * @param   void
+     * @return  boolean
+     */
+    public function isIndexable()
+    {
+        if (! $this->domdocument)
+            return false;
+
+        $metas      = $this->domdocument->getElementsByTagName('meta');
+            
+        foreach($metas as $meta) {
+        
+            //Opengraph Test
+            if ($meta->getAttribute('name') == 'robots') {
+
+                $robots = mb_strtolower($meta->getAttribute('content'));
+
+                return strpos($robots, 'noindex') ? false : true;
+
+            }
+
+        }
+
+        // if meta robots not found default behavior is index
+        return true;
+    }
+
+    /**
+     * Check meta tag robots to determine if page is followable
+     *
+     * @param   void
+     * @return  boolean
+     */
+    public function isFollowable()
+    {
+        if (! $this->domdocument)
+            return false;
+
+        $metas      = $this->domdocument->getElementsByTagName('meta');
+            
+        foreach($metas as $meta) {
+        
+            //Opengraph Test
+            if ($meta->getAttribute('name') == 'robots') {
+
+                $robots = mb_strtolower($meta->getAttribute('content'));
+
+                return strpos($robots, 'nofollow') ? false : true;
+
+            }
+
+        }
+
+        // if meta robots not found default behavior is index
+        return true;
+    }
+
+    /**
      * Get the Base Path for current document. Work only if current document is a HTML document.
      *
      * @param   void
@@ -671,12 +745,20 @@ class WebHarvester {
      */
     public function getLinks($options = [])
     {
+        $default_options =  [
+                                'only_urls' => true,
+                            ];
+
+        $options = array_merge($default_options, $options);
+
         $links = $this->links;
+
+        $links_array = [];
 
         foreach ($links as $key => $link) {
 
             //remove link with javascript script for safe
-            if (strpos($link, 'javascript:')) {
+            if (strpos($link->url, 'javascript:')) {
                 unset($links[$key]);
                 continue;
             }
@@ -687,19 +769,27 @@ class WebHarvester {
                 //remove query component from links
                 if (in_array('query', $options['remove'])) {
 
-                        $components = parse_url($link);
-                        $links[$key] = $components['scheme'] . '://' . $components['host'];
+                    $components = parse_url($link->url);
+                    $links[$key]->url = $components['scheme'] . '://' . $components['host'];
 
-                        if (isset($components['path']))
-                            $links[$key] .= $components['path'];
+                    if (isset($components['path']))
+                        $links[$key]->url .= $components['path'];
 
                 }
 
             }
 
+            //test for uniqueness
+            if (in_array($links[$key]->url, $links_array)) {
+                unset($links[$key]);
+            }
+            else {
+                $links_array[] = $links[$key]->url;
+            }
+
         }
 
-        return array_values($links);
+        return $options['only_urls'] ? array_values($links_array) : array_values($links);
     }
 
     /**

@@ -64,6 +64,30 @@ example: `'environment' => 'macosx'`
         $sitename                = $webharvester->getSiteName();
     }
 
+### Get expected behavior of the Robot (based on meta name="robots")
+
+    $url = 'http://someurl';
+    $webharvester = new WebHarvester;
+    
+    //Check if we can process the URL and Load it
+    if ($webharvester->load($url)) {
+
+        //check for index
+        if ($webharvester->isIndexable()) {
+
+            //...some code
+
+        }
+
+        //check for follow
+        if ($webharvester->isFollowable()) {
+
+            //...some code
+            
+        }
+
+    }
+
 ### Get found links in WebPage (useful for web crawlers, web spiders, etc.)
 
     $url = 'http://someurl';
@@ -72,13 +96,21 @@ example: `'environment' => 'macosx'`
     //Check if we can process the URL and Load it
     if ($webharvester->load($url)) {
 
-        //all full links
+        //all full links as array
+
         $links = $webharvester->getLinks();  //retrieve an array with found links
 
-        //all links, but query component removed (from the character "?" onwards)
+        //all links as array, but query component removed (from the character "?" onwards)
+
         $links = $webharvester->getLinks([
             'remove' => ['query']
         ]);
+
+        //retrieve links as array of objects (properties: url, follow)
+        //if follow is false indicate than that links is marked to no follow (rel='nofollow') by the source website
+
+        $links = $webharvester->getLinks(['only_urls' => false]); //default true
+
     }
 
 **Important**: For security reasons all links with embeded javascript are not included in output array
