@@ -200,6 +200,10 @@ class WebHarvester {
             throw new Exception("[WebHarvester] Error on Environment Setup: you must define 'environment' var in webharvester config file.", 1);
 
         $httpclient = __DIR__ . '/bin/phantom/1.9.7-' . $environment . '/phantomjs';
+
+        //add .exe extension for windows bin
+        if ($environment == 'windows')
+            $httpclient .= '.exe';
         
         if (! file_exists($httpclient))
             throw new Exception("[WebHarvester] Error: file '" . $httpclient . "' not found. Suggestion: Check the 'environment' var in webharvester config file", 1);
