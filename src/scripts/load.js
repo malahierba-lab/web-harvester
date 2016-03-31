@@ -7,6 +7,7 @@ url             = options.url;
 content         = null;
 requested_url   = url;
 effective_url   = url;
+status_code     = null;
 
 var page        = require('webpage').create();
 
@@ -18,6 +19,12 @@ page.settings = {
     webSecurityEnabled  : options.web_security,
     encoding            : "utf8",
 }
+
+page.onResourceReceived = function(resource){
+    if ((resource.url == requested_url) || (resource.url == effective_url)) {
+        status_code = resource.status;
+    }
+};
 
 page.onResourceError = function(resourceError)
 {
@@ -47,14 +54,17 @@ page.onLoadFinished = function (status)
 {
     setTimeout (function()
     {
+
         //content = page.content;
         content = page.content;
 
+        console.log(status_code);
         console.log(requested_url);
         console.log(effective_url);
         console.log(content);
 
         phantom.exit();
+
     }, options.wait_after_load);
 }
 

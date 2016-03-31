@@ -51,6 +51,9 @@ example: `'environment' => 'macosx'`
         //Page Description
         $description             = $webharvester->getDescription();
 
+        //Get Status Code (If the url redirect to another webpage, then return the status code for the final webpage)
+        $status_code             = $webharvester->getStatusCode();
+
         //Page Featured Image as URL
         $featured_image_url      = $webharvester->getFeaturedImage();
 

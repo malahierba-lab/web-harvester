@@ -26,6 +26,8 @@ class WebHarvester {
         'fragment'  => null,
     ];
 
+    protected $status_code;
+
     protected $content;
 
     protected $domdocument = false;
@@ -199,7 +201,7 @@ class WebHarvester {
         if (empty($environment))
             throw new Exception("[WebHarvester] Error on Environment Setup: you must define 'environment' var in webharvester config file.", 1);
 
-        $httpclient = __DIR__ . '/bin/phantom/1.9.7-' . $environment . '/phantomjs';
+        $httpclient = __DIR__ . '/bin/phantom/2.1.1-' . $environment . '/phantomjs';
 
         //add .exe extension for windows bin
         if ($environment == 'windows')
@@ -290,11 +292,21 @@ class WebHarvester {
         foreach($output as $key => $line) {
 
             if ($key == 0) {
-                $this->requested_url = $this->getInfoFromURL($line);
+
+                $this->status_code       = (int) $line;
+
             } elseif ($key == 1) {
-                $this->real_url = $this->getInfoFromURL($line);
+
+                $this->requested_url     = $this->getInfoFromURL($line);
+
+            } elseif ($key == 2) {
+
+                $this->real_url          = $this->getInfoFromURL($line);
+
             } else {
-                $this->content .= $this->stringToHTMLENTITIES($line);
+
+                $this->content          .= $this->stringToHTMLENTITIES($line);
+
             }
         }
     }
@@ -792,6 +804,16 @@ class WebHarvester {
         }
 
         return $options['only_urls'] ? array_values($links_array) : array_values($links);
+    }
+
+    /**
+     * Return the status code for page requested
+     *
+     * @return int
+     */
+    public function getStatusCode()
+    {
+        return (int) $this->status_code;
     }
 
     /**
