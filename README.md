@@ -35,7 +35,7 @@ example: `'environment' => 'macosx'`
 
 ## Use
 
-**Important**: For documentation purposes, in the examples below, always we assume than you import the library into your namespace using `use Malahierba\WebHarvester;`
+**Important**: For documentation purposes, in the examples below, always we assume than you import the library into your namespace using `use Malahierba\WebHarvester\WebHarvester;`
 
 ### Get WebPage Components
 
