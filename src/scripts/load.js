@@ -9,6 +9,13 @@ requested_url   = url;
 effective_url   = url;
 status_code     = null;
 
+if (options.max_execution_time != 0) {
+    setTimeout(function()
+    {
+        phantom.exit(2); //Status 2: Time to process URL exceeded
+    }, options.max_execution_time);
+}
+
 var page        = require('webpage').create();
 
 page.settings = {
@@ -54,7 +61,6 @@ page.onLoadFinished = function (status)
 {
     setTimeout (function()
     {
-
         //content = page.content;
         content = page.content;
 
@@ -75,6 +81,6 @@ page.open(url, function (status)
             "Error opening url \"" + page.reason_url
             + "\": " + page.reason
         );
-        phantom.exit(1); //Status 1: no se pudo cargar la URL
+        phantom.exit(1); //Status 1: Fail to load URL
     }
 });

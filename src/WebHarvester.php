@@ -39,6 +39,7 @@ class WebHarvester {
     protected $resource_timeout         = 3000;
     protected $wait_after_load          = 3000;
     protected $ignore_ssl_errors        = true;
+    protected $max_execution_time       = 20000;
 
     /**
      * Load an URL and put the content and info at instance vars
@@ -233,6 +234,7 @@ class WebHarvester {
         $command    .= ' resource-timeout=' . $this->resource_timeout;
         $command    .= ' web-security=false';
         $command    .= ' load-images=false';
+        $command    .= ' max-execution-time=' . $this->max_execution_time;
         $command    .= ' user-agent="' . $this->user_agent . '"';
 
         return $command;
@@ -258,6 +260,7 @@ class WebHarvester {
         $command    .= ' resource-timeout=' . $this->resource_timeout;
         $command    .= ' web-security=false';
         $command    .= ' load-images=true';
+        $command    .= ' max-execution-time=' . $this->max_execution_time;
         $command    .= ' user-agent="' . $this->user_agent . '"';
 
         return $command;
@@ -861,5 +864,16 @@ class WebHarvester {
     public function setIgnoreSSLErrors($bool)
     {
         $this->ignore_ssl_errors = $bool;
+    }
+
+    /**
+     * Configure the max execution time in millisenconds to wait before close phnatomjs
+     *
+     * @param   integer
+     * @return  void
+     */
+    public function setMaxExecutionTime($milliseconds)
+    {
+        $this->max_execution_time = $milliseconds;
     }
 }
